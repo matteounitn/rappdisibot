@@ -14,3 +14,5 @@
 (If you don't know how to get bot API KEY just google "How to create bot with botfather telegram")
 ### Step 4
 - Start your bot with `python3 bot.py`.
+### Step 5
+- Edit `plugins/structures.py` and set your id. This let you use `/helper @username` command.
