@@ -13,6 +13,7 @@ admin = ["387885123"]
 userAF = RedisDict(redis=redis, key='usersAF')  # for antiflood
 helper = RedisDict(redis=redis, key='helpers')
 users = RedisDict(redis=redis, key='users')
+assistant_icon = "👩🏻‍💼"
 userKeyboard = [[  # First row
     InlineKeyboardButton(  # Generates a callback query when pressed
         "🕵️‍♂️ Anonimo",

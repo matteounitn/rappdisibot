@@ -3,12 +3,11 @@ import time
 from pyrogram import Client, Filters, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait, BadRequest
 
+from plugins.structures import assistant_icon
 from . import structures
 
 once = False
 msgs = {}
-
-assistant_icon = "👩🏻‍💼"
 
 @Client.on_message(Filters.command(["start", "help"]))
 def start(client, message):
