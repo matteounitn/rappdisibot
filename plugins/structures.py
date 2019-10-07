@@ -50,9 +50,9 @@ def killStartedConversations(client):
     for key, value in helper.items():
         if 'connectedWith' in value and value['connectedWith'] is not False and antiflood(key, 'afkcheck', sec=3600):
             set(value['connectedWith'], 'status', False)
-            client.send_message(value['connectedWith'], "👩🏻‍💼: La chat è stata chiusa per inattività.")
+            client.send_message(value['connectedWith'], f"{assistant_icon}: La chat è stata chiusa per inattività.")
             redisWR(userAF, str(value['connectedWith']), 'handler', 0)
-            client.send_message(key, "👩🏻‍💼: La chat è stata chiusa per inattività.")
+            client.send_message(key, f"{assistant_icon}: La chat è stata chiusa per inattività.")
             setHelper(key, 'connectedWith', False)
 
 
