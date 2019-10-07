@@ -8,6 +8,7 @@ from . import structures
 once = False
 msgs = {}
 
+assistant_icon = "👩🏻‍💼"
 
 @Client.on_message(Filters.command(["start", "help"]))
 def start(client, message):
@@ -19,7 +20,7 @@ def start(client, message):
             message.reply(
                 "Benvenuto 👋\n**Scrivi la tua richiesta** e mi occuperò di inoltrarla ai rappresentanti.\n\nTi darò la possibilità di rimanere anonimo (🕵️‍♂️).")
     elif structures.antiflood(message.from_user.id, 'start', sec=10):
-        message.reply("👩🏻‍💼: Sei stato bloccato per l'uso improprio del bot.")
+        message.reply(f"{assistant_icon}: Sei stato bloccato per l'uso improprio del bot.")
 
 
 def notifyOthers(text, iduser, callback_query, show_keyboard=True):
@@ -61,21 +62,21 @@ def callbackAnswer(client, callback_query):
     try:
         if callback_query.data == "userNormal":
             client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                     "👩🏻‍💼: Abbiamo ricevuto la tua richiesta.")
+                                     f"{assistant_icon}: Abbiamo ricevuto la tua richiesta.")
             structures.set(callback_query.message.chat.id, 'anonymous', False)
             askForHelp(client, callback_query.from_user.first_name, callback_query.from_user.id,
                        structures.get(callback_query.message.chat.id, 'message'))
 
         elif callback_query.data == "userAnonymous":
             client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                     "👩🏻‍💼: Abbiamo ricevuto la tua richiesta.")
+                                     f"{assistant_icon}: Abbiamo ricevuto la tua richiesta.")
             structures.set(callback_query.message.chat.id, 'anonymous', True)
             askForHelp(client, callback_query.from_user.first_name, callback_query.from_user.id,
                        structures.get(callback_query.message.chat.id, 'message'), True)
         elif "helperAnonymous" in callback_query.data:
             iduser = callback_query.data.split("_")[1]
             if not notifyOthers(
-                    f"👩🏻‍💼: La richiesta è stata presa in carico.\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
+                    f"{assistant_icon}: La richiesta è stata presa in carico.\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
                     iduser, callback_query):
                 return
             hasMedia = structures.get(iduser, 'media')
@@ -87,21 +88,21 @@ def callbackAnswer(client, callback_query):
                     )
                 ]]
                 client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"👩🏻‍💼: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
+                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
                                          reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"👩🏻‍💼: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
+                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
             time.sleep(0.5)
             try:
                 client.send_message(iduser,
-                                    f"👩🏻‍💼: La tua richiesta è stata processata.\n\n__(la chat inizia ora, concludila con__ /end __quando hai finito)__.")
+                                    f"{assistant_icon}: La tua richiesta è stata processata.\n\n__(la chat inizia ora, concludila con__ /end __quando hai finito)__.")
             except Exception as e:
                 print(e)
                 check = str(e).split(":")[0]
                 if check == "[400 USER_IS_BLOCKED]":
                     client.send_message(callback_query.message.chat.id,
-                                        "👩🏻‍💼: L'utente ha bloccato il bot! Annullo.")
+                                        f"{assistant_icon}: L'utente ha bloccato il bot! Annullo.")
                 return
 
             structures.setHelper(callback_query.message.chat.id, 'anonymous', True)
@@ -112,7 +113,7 @@ def callbackAnswer(client, callback_query):
         elif "helperNormal" in callback_query.data:
             iduser = callback_query.data.split("_")[1]
             if not notifyOthers(
-                    f"👩🏻‍💼: La richiesta è stata presa in carico da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id})\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
+                    f"{assistant_icon}: La richiesta è stata presa in carico da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id})\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
                     iduser, callback_query):
                 return
             hasMedia = structures.get(iduser, 'media')
@@ -124,21 +125,21 @@ def callbackAnswer(client, callback_query):
                     )
                 ]]
                 client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"👩🏻‍💼: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
+                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
                                          reply_markup=InlineKeyboardMarkup(keyboard))
             else:
                 client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"👩🏻‍💼: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
+                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
             time.sleep(0.5)
             try:
                 client.send_message(iduser,
-                                    f"👩🏻‍💼: La tua richiesta è stata processata da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id}).\nLa chat inizia ora, concludila con /end quando hai finito.")
+                                    f"{assistant_icon}: La tua richiesta è stata processata da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id}).\nLa chat inizia ora, concludila con /end quando hai finito.")
             except Exception as e:
                 print(e)
                 check = str(e).split(":")[0]
                 if check == "[400 USER_IS_BLOCKED]":
                     client.send_message(callback_query.message.chat.id,
-                                        "👩🏻‍💼: L'utente ha bloccato il bot! Annullo.")
+                                        f"{assistant_icon}: L'utente ha bloccato il bot! Annullo.")
                 return
             structures.setHelper(callback_query.message.chat.id, 'anonymous', False)
             structures.antiflood(str(callback_query.message.chat.id), 'afkcheck', sec=0)
@@ -149,7 +150,7 @@ def callbackAnswer(client, callback_query):
         elif "blockUser" in callback_query.data:
             iduser = callback_query.data.split("_")[1]
             if not notifyOthers(
-                    f"👩🏻‍💼: L'utente è stato bloccato da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id})\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
+                    f"{assistant_icon}: L'utente è stato bloccato da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id})\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
                     iduser, callback_query):
                 return
             if structures.get(iduser, 'rejected') is not False:
@@ -158,24 +159,24 @@ def callbackAnswer(client, callback_query):
                 structures.set(iduser, 'rejected', 1)
             if structures.toggleBan(iduser):
                 client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"👩🏻‍💼: Ho sbannato l'utente dal bot.",
+                                         f"{assistant_icon}: Ho sbannato l'utente dal bot.",
                                          reply_markup=InlineKeyboardMarkup(
                                              [[InlineKeyboardButton("🚫 Blocca utente ",
                                                                     callback_data=f"blockUser_{iduser}")]]))
                 structures.redisWR(structures.userAF, str(iduser), 'handler', 0)
             else:
                 client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"👩🏻‍💼: Ho bannato l'utente dal bot.",
+                                         f"{assistant_icon}: Ho bannato l'utente dal bot.",
                                          reply_markup=InlineKeyboardMarkup(
                                              [[InlineKeyboardButton("✅ Sblocca utente ",
                                                                     callback_data=f"blockUser_{iduser}")]]))
         elif callback_query.data == "cancelCurrentOperation":
             client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                     f"👩🏻‍💼: Ho annullato l'operazione.")
+                                     f"{assistant_icon}: Ho annullato l'operazione.")
             structures.redisWR(structures.userAF, str(callback_query.message.chat.id), 'handler', 0)
         elif callback_query.data == "aBroadcastConfirm":
             client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                     "👩🏻‍💼: Procedo all'invio!",
+                                     f"{assistant_icon}: Procedo all'invio!",
                                      reply_markup=InlineKeyboardMarkup(structures.BackKeyboard))
             sendBroadcast(client)
         elif callback_query.data == "close":
@@ -183,14 +184,14 @@ def callbackAnswer(client, callback_query):
         elif "delRequest" in callback_query.data:
             iduser = callback_query.data.split("_")[1]
             if not notifyOthers(
-                    f"👩🏻‍💼: La richiesta è stata scartata da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id}).",
+                    f"{assistant_icon}: La richiesta è stata scartata da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id}).",
                     iduser, callback_query, show_keyboard=False):
                 return
             client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                     f"👩🏻‍💼: Ho scartato la richiesta.\n\nIl messaggio dell'utente:\n\n__{structures.get(iduser, 'message')}__")
+                                     f"{assistant_icon}: Ho scartato la richiesta.\n\nIl messaggio dell'utente:\n\n__{structures.get(iduser, 'message')}__")
             structures.redisWR(structures.userAF, str(iduser), 'handler', 0)
             client.send_message(iduser,
-                                "👩🏻‍💼: I rappresentanti hanno scartato la tua richiesta.")
+                                f"{assistant_icon}: I rappresentanti hanno scartato la tua richiesta.")
             if structures.get(iduser, 'rejected') is not False:
                 structures.set(iduser, 'rejected', structures.get(iduser, 'rejected') + 1)
             else:
@@ -216,7 +217,7 @@ def end(client, message):
     if structures.isHelper(message.from_user.id) and structures.isInSession(message.from_user.id, type='helper'):
         try:
             client.send_message(structures.getHelper(message.from_user.id, 'connectedWith'),
-                                "👩🏻‍💼: Il rappresentante ha concluso la chat.")
+                                f"{assistant_icon}: Il rappresentante ha concluso la chat.")
         except:
             pass
         structures.redisWR(structures.userAF, str(structures.getHelper(message.from_user.id, 'connectedWith')),
@@ -226,7 +227,7 @@ def end(client, message):
 
         try:
             message.reply(
-                "👩🏻‍💼: Hai concluso la chat.")
+                f"{assistant_icon}: Hai concluso la chat.")
 
         except:
             pass
@@ -234,14 +235,14 @@ def end(client, message):
         structures.set(message.from_user.id, 'status', False)
         try:
             client.send_message(structures.get(message.from_user.id, 'connectedWith'),
-                                "👩🏻‍💼: L'utente ha concluso la chat.")
+                                f"{assistant_icon}: L'utente ha concluso la chat.")
         except:
             pass
         structures.setHelper(structures.get(message.from_user.id, 'connectedWith'), 'connectedWith', False)
         structures.redisWR(structures.userAF, str(message.from_user.id), 'handler', 0)
         try:
             message.reply(
-                "👩🏻‍💼: Hai concluso la chat.")
+                f"{assistant_icon}: Hai concluso la chat.")
 
         except:
             pass
@@ -262,7 +263,7 @@ def forward(client, message, anon):
         print(e)
         check = str(e).split(":")[0]
         if check == "[400 USER_IS_BLOCKED]":
-            message.reply("👩🏻‍💼: Per motivi organizzativi, la chat è stata annullata. Rifai la richiesta.")
+            message.reply(f"{assistant_icon}: Per motivi organizzativi, la chat è stata annullata. Rifai la richiesta.")
             structures.set(message.from_user.id, 'status', False)
             structures.setHelper(structures.get(message.from_user.id, 'connectedWith'), 'connectedWith', False)
             structures.redisWR(structures.userAF, str(message.from_user.id), 'handler', 0)
@@ -270,7 +271,7 @@ def forward(client, message, anon):
             client.send_message("@matteounitn",
                                 f"Errore \n{e}\n\n [{message.from_user.first_name}](tg://user?id={message.from_user.id})")
             message.reply(
-                "👩🏻‍💼: Qualcosa è andato storto!\nGli amministratori sono già stati avvisati del problema.")
+                f"{assistant_icon}: Qualcosa è andato storto!\nGli amministratori sono già stati avvisati del problema.")
 
 
 def answerHelper(client, message, anon):
@@ -287,7 +288,7 @@ def answerHelper(client, message, anon):
         print(e)
         check = str(e).split(":")[0]
         if check == "[400 USER_IS_BLOCKED]":
-            message.reply("👩🏻‍💼: L'utente ha fermato il bot! Annullo la chat.")
+            message.reply(f"{assistant_icon}: L'utente ha fermato il bot! Annullo la chat.")
             structures.redisWR(structures.userAF, str(structures.getHelper(message.from_user.id, 'connectedWith')),
                                'handler', 0)
             structures.set(structures.getHelper(message.from_user.id, 'connectedWith'), 'status', False)
@@ -296,7 +297,7 @@ def answerHelper(client, message, anon):
             client.send_message("@matteounitn",
                                 f"Errore \n{e}\n\n [{message.from_user.first_name}](tg://user?id={message.from_user.id})")
             message.reply(
-                "👩🏻‍💼: Qualcosa è andato storto!\nGli amministratori sono già stati avvisati del problema.")
+                f"{assistant_icon}: Qualcosa è andato storto!\nGli amministratori sono già stati avvisati del problema.")
 
 
 def askForHelp(client, first_name, userid, text, anon=False):
@@ -354,21 +355,21 @@ def askForHelp(client, first_name, userid, text, anon=False):
         rejected = f"\n\n__Richieste scartate:\n{structures.get(userid, 'rejected')} {total}__"
     if len(text) > 3296:
         client.send_message(userid,
-                            "👩🏻‍💼: La richiesta è troppo lunga!\nRiassumi e rifai la richiesta, i dettagli possono essere spiegati nella **live chat**.")
+                            f"{assistant_icon}: La richiesta è troppo lunga!\nRiassumi e rifai la richiesta, i dettagli possono essere spiegati nella **live chat**.")
         structures.redisWR(structures.userAF, str(userid), 'handler', 0)
         return
     for key, value in structures.helper.items():
         if 'connectedWith' not in value or not value['connectedWith']:
             try:
                 msg = client.send_message(key,
-                                          f"👩🏻‍💼: Richiesta di assistenza da parte di [{nome}]({link})\nCon testo:\n\n__{text}__\n\nPremi su uno dei pulsanti per rispondere.{rejected}{percentage}",
+                                          f"{assistant_icon}: Richiesta di assistenza da parte di [{nome}]({link})\nCon testo:\n\n__{text}__\n\nPremi su uno dei pulsanti per rispondere.{rejected}{percentage}",
                                           reply_markup=InlineKeyboardMarkup(helperKeyboard))
                 msgs[str(userid)].append(msg)
             except Exception as e:
                 print(e)
     if len(msgs[str(userid)]) == 0:
         client.send_message(userid,
-                            "👩🏻‍💼: Mi dispiace, nessun rappresentante è disponibile in questo momento 😔\n__Riprova più tardi con una nuova richiesta!__")
+                            f"{assistant_icon}: Mi dispiace, nessun rappresentante è disponibile in questo momento 😔\n__Riprova più tardi con una nuova richiesta!__")
         structures.redisWR(structures.userAF, str(userid), 'handler', 0)
 
 
@@ -380,7 +381,7 @@ def addHelper(client, message):
             try:
                 usr = client.get_chat(toget[1])
             except Exception as e:
-                message.reply("👩🏻‍💼: Non ho trovato l'utente. Riprova")
+                message.reply(f"{assistant_icon}: Non ho trovato l'utente. Riprova")
                 return
         else:
             return
@@ -405,7 +406,7 @@ def unBan(client, message):
             try:
                 usr = client.get_chat(toget[1])
             except Exception as e:
-                message.reply("👩🏻‍💼: Non ho trovato l'utente. Riprova")
+                message.reply(f"{assistant_icon}: Non ho trovato l'utente. Riprova")
                 return
         else:
             return
@@ -415,10 +416,10 @@ def unBan(client, message):
             else:
                 name = f"{usr.first_name}"
             if structures.toggleBan(usr.id):
-                message.reply(f"👩🏻‍💼: Ho sbannato [{name}](tg://user?id={usr.id}) dal bot.")
+                message.reply(f"{assistant_icon}: Ho sbannato [{name}](tg://user?id={usr.id}) dal bot.")
                 structures.redisWR(structures.userAF, str(usr.id), 'handler', 0)
             else:
-                message.reply(f"👩🏻‍💼: Ho bannato [{name}](tg://user?id={usr.id}) dal bot.")
+                message.reply(f"{assistant_icon}: Ho bannato [{name}](tg://user?id={usr.id}) dal bot.")
 
 
 def getFileID(message):
@@ -447,7 +448,7 @@ def handler(client, message):
             if not structures.get(message.from_user.id, 'status'):  # he is not in a chat with an connectedWith
                 if structures.antiflood(message.from_user.id, 'handler', sec=3600):
                     # askForHelp(client, message)
-                    message.reply("👩🏻‍💼: Come vuoi inviare la richiesta?",
+                    message.reply(f"{assistant_icon}: Come vuoi inviare la richiesta?",
                                   reply_markup=InlineKeyboardMarkup(structures.userKeyboard))
 
                     if message.media is None:
@@ -464,7 +465,7 @@ def handler(client, message):
 
                 elif structures.antiflood(message.from_user.id, 'handlerAnswer', sec=5):
                     message.reply(
-                        "👩🏻‍💼: Puoi fare una richiesta di aiuto ogni ora!\nNon preoccuparti,\n__i rappresentanti hanno preso in considerazione la tua richiesta.__\n\n**Risponderemo il prima possibile.**")
+                        f"{assistant_icon}: Puoi fare una richiesta di aiuto ogni ora!\nNon preoccuparti,\n__i rappresentanti hanno preso in considerazione la tua richiesta.__\n\n**Risponderemo il prima possibile.**")
             else:
                 anon = structures.get(message.from_user.id, 'anonymous')
                 forward(client, message, anon)
@@ -472,7 +473,7 @@ def handler(client, message):
         if structures.getHelper(message.from_user.id, 'connectedWith') is not False:
             answerHelper(client, message, structures.getHelper(message.from_user.id, 'anonymous'))
         else:
-            message.reply("👩🏻‍💼: Non sei in contatto con nessun utente!")
+            message.reply(f"{assistant_icon}: Non sei in contatto con nessun utente!")
 
 
 def sendBroadcast(client):
