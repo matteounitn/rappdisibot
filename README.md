@@ -1,5 +1,8 @@
 # RappDisiBot
 ## How to install
+### Step 0
+- Install Redis `sudo apt install redis-server`
+- Eventually start Redis server with `redis-server`
 ### Step 1
 - Go to https://my.telegram.org/auth?to=apps;
 - Create an app(doesn't matter how do you call it);
