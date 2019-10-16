@@ -9,6 +9,7 @@ from . import structures
 once = False
 msgs = {}
 
+
 @Client.on_message(Filters.command(["start", "help"]))
 def start(client, message):
     if structures.isHelper(message.from_user.id):
@@ -73,79 +74,86 @@ def callbackAnswer(client, callback_query):
             askForHelp(client, callback_query.from_user.first_name, callback_query.from_user.id,
                        structures.get(callback_query.message.chat.id, 'message'), True)
         elif "helperAnonymous" in callback_query.data:
-            iduser = callback_query.data.split("_")[1]
-            if not notifyOthers(
-                    f"{assistant_icon}: La richiesta è stata presa in carico.\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
-                    iduser, callback_query):
-                return
-            hasMedia = structures.get(iduser, 'media')
-            if hasMedia is not False:
-                keyboard = [[
-                    InlineKeyboardButton(
-                        "🖼 Vedi Media",
-                        callback_data=f"media_{iduser}"
-                    )
-                ]]
-                client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
-                                         reply_markup=InlineKeyboardMarkup(keyboard))
-            else:
-                client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
-            time.sleep(0.5)
-            try:
-                client.send_message(iduser,
-                                    f"{assistant_icon}: La tua richiesta è stata processata.\n\n__(la chat inizia ora, concludila con__ /end __quando hai finito)__.")
-            except Exception as e:
-                print(e)
-                check = str(e).split(":")[0]
-                if check == "[400 USER_IS_BLOCKED]":
-                    client.send_message(callback_query.message.chat.id,
-                                        f"{assistant_icon}: L'utente ha bloccato il bot! Annullo.")
-                return
+            if structures.getHelper(callback_query.message.chat.id, 'connectedWith') is False:
+                iduser = callback_query.data.split("_")[1]
+                if not notifyOthers(
+                        f"{assistant_icon}: La richiesta è stata presa in carico.\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
+                        iduser, callback_query):
+                    return
+                hasMedia = structures.get(iduser, 'media')
+                if hasMedia is not False:
+                    keyboard = [[
+                        InlineKeyboardButton(
+                            "🖼 Vedi Media",
+                            callback_data=f"media_{iduser}"
+                        )
+                    ]]
+                    client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
+                                             f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
+                                             reply_markup=InlineKeyboardMarkup(keyboard))
+                else:
+                    client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
+                                             f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
+                time.sleep(0.5)
+                try:
+                    client.send_message(iduser,
+                                        f"{assistant_icon}: La tua richiesta è stata processata.\n\n__(la chat inizia ora, concludila con__ /end __quando hai finito)__.")
+                except Exception as e:
+                    print(e)
+                    check = str(e).split(":")[0]
+                    if check == "[400 USER_IS_BLOCKED]":
+                        client.send_message(callback_query.message.chat.id,
+                                            f"{assistant_icon}: L'utente ha bloccato il bot! Annullo.")
+                    return
 
-            structures.setHelper(callback_query.message.chat.id, 'anonymous', True)
-            structures.antiflood(str(callback_query.message.chat.id), 'afkcheck', sec=0)
-            structures.setHelper(callback_query.message.chat.id, 'connectedWith', iduser)
-            structures.set(iduser, 'connectedWith', callback_query.message.chat.id)
-            structures.set(iduser, 'status', True)
+                structures.setHelper(callback_query.message.chat.id, 'anonymous', True)
+                structures.antiflood(str(callback_query.message.chat.id), 'afkcheck', sec=0)
+                structures.setHelper(callback_query.message.chat.id, 'connectedWith', iduser)
+                structures.set(iduser, 'connectedWith', callback_query.message.chat.id)
+                structures.set(iduser, 'status', True)
+            else:
+                client.send_message(callback_query.message.chat.id,
+                                    f"{assistant_icon}: Sei già in chat con un utente!\nFai /end se vuoi rispondere ad un altro utente.")
         elif "helperNormal" in callback_query.data:
-            iduser = callback_query.data.split("_")[1]
-            if not notifyOthers(
-                    f"{assistant_icon}: La richiesta è stata presa in carico da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id})\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
-                    iduser, callback_query):
-                return
-            hasMedia = structures.get(iduser, 'media')
-            if hasMedia is not False:
-                keyboard = [[
-                    InlineKeyboardButton(
-                        "🖼 Vedi Media",
-                        callback_data=f"media_{iduser}"
-                    )
-                ]]
-                client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
-                                         reply_markup=InlineKeyboardMarkup(keyboard))
+            if structures.getHelper(callback_query.message.chat.id, 'connectedWith') is False:
+                iduser = callback_query.data.split("_")[1]
+                if not notifyOthers(
+                        f"{assistant_icon}: La richiesta è stata presa in carico da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id})\n\nIl messaggio dell'utente è:\n\n__{structures.get(iduser, 'message')}__",
+                        iduser, callback_query):
+                    return
+                hasMedia = structures.get(iduser, 'media')
+                if hasMedia is not False:
+                    keyboard = [[
+                        InlineKeyboardButton(
+                            "🖼 Vedi Media",
+                            callback_data=f"media_{iduser}"
+                        )
+                    ]]
+                    client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
+                                             f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__",
+                                             reply_markup=InlineKeyboardMarkup(keyboard))
+                else:
+                    client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
+                                             f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
+                time.sleep(0.5)
+                try:
+                    client.send_message(iduser,
+                                        f"{assistant_icon}: La tua richiesta è stata processata da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id}).\nLa chat inizia ora, concludila con /end quando hai finito.")
+                except Exception as e:
+                    print(e)
+                    check = str(e).split(":")[0]
+                    if check == "[400 USER_IS_BLOCKED]":
+                        client.send_message(callback_query.message.chat.id,
+                                            f"{assistant_icon}: L'utente ha bloccato il bot! Annullo.")
+                    return
+                structures.setHelper(callback_query.message.chat.id, 'anonymous', False)
+                structures.antiflood(str(callback_query.message.chat.id), 'afkcheck', sec=0)
+                structures.setHelper(callback_query.message.chat.id, 'connectedWith', iduser)
+                structures.set(iduser, 'connectedWith', callback_query.message.chat.id)
+                structures.set(iduser, 'status', True)
             else:
-                client.edit_message_text(callback_query.message.chat.id, callback_query.message.message_id,
-                                         f"{assistant_icon}: Fatto! Da adesso in poi risponderai all'utente.\nFai /end per concludere la chat.\n\n__Il messaggio era: {structures.get(iduser, 'message')}__")
-            time.sleep(0.5)
-            try:
-                client.send_message(iduser,
-                                    f"{assistant_icon}: La tua richiesta è stata processata da [{callback_query.from_user.first_name}](tg://user?id={callback_query.message.chat.id}).\nLa chat inizia ora, concludila con /end quando hai finito.")
-            except Exception as e:
-                print(e)
-                check = str(e).split(":")[0]
-                if check == "[400 USER_IS_BLOCKED]":
-                    client.send_message(callback_query.message.chat.id,
-                                        f"{assistant_icon}: L'utente ha bloccato il bot! Annullo.")
-                return
-            structures.setHelper(callback_query.message.chat.id, 'anonymous', False)
-            structures.antiflood(str(callback_query.message.chat.id), 'afkcheck', sec=0)
-            structures.setHelper(callback_query.message.chat.id, 'connectedWith', iduser)
-            structures.set(iduser, 'connectedWith', callback_query.message.chat.id)
-            structures.set(iduser, 'status', True)
-
+                client.send_message(callback_query.message.chat.id,
+                                    f"{assistant_icon}: Sei già in chat con un utente!\nFai /end se vuoi rispondere ad un altro utente.")
         elif "blockUser" in callback_query.data:
             iduser = callback_query.data.split("_")[1]
             if not notifyOthers(
