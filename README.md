@@ -18,4 +18,4 @@
 ### Step 4
 - Start your bot with `python3 bot.py`.
 ### Step 5
-- Edit `plugins/structures.py` and set your id. This let you use `/helper @username` command.
+- Edit `plugins/structures.py` and set your id in the `admin=["ID"]`. This let you use `/helper @username` command.
