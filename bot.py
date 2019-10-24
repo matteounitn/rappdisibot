@@ -1,22 +1,32 @@
 from pyrogram import Client
-import sys
+import argparse
 from plugins import structures
 # setto in quale cartella ho i plugins
 plugins = dict(
     root="plugins"
 )
-if len(sys.argv) <= 2:
+
+plugins = dict(
+    root="plugins"
+)
+parser = argparse.ArgumentParser()
+parser.add_argument('-a', '--account', action='store', type=str,
+                    help="set which session are you using")
+parser.add_argument('-t', '--token', action='store', type=str,
+                    help="Token to use")
+
+args = parser.parse_args()
+if not args.account:
     accountname = "my_account"
-    bottoken = "123456:drtgfxcdfrgbvdcvfd"
-elif len(sys.argv) == 2:
-    accountname = sys.argv[1]
-    bottoken = None
-elif len(sys.argv) == 3:
-    accountname = sys.argv[1]
-    bottoken = sys.argv[2]
+else:
+    accountname = args.account
+
+if not args.token:
+    print("[ERROR] You have to set a token!")
+    exit(1)
 
 
-app = Client(accountname, bot_token=bottoken,
+app = Client(accountname, bot_token=args.token,
              plugins=plugins)  # inizializzo + plugins
 print("Avvio bot..")
 structures.isBot = True

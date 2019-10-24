@@ -2,3 +2,4 @@ pyrogram[fast]
 apscheduler
 pottery
 redis
+argparse
