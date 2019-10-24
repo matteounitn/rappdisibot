@@ -25,7 +25,7 @@ Assuming your token is `123456:drtgfxcdfrgbvdcvfd`
 
 `python3 bot.py -t 123456:drtgfxcdfrgbvdcvfd`
 
-##### Using screen 
+##### Using screen (background running)
 `screen -dmS mybot python3 bot.py -t 123456:drtgfxcdfrgbvdcvfd`
 
 and close the instance with
