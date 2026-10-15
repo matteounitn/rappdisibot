@@ -21,8 +21,10 @@ Copre le invarianti nate da bug reali:
 from __future__ import annotations
 
 import asyncio
+import atexit
 import os
 import re
+import shutil
 import sqlite3
 import sys
 import tempfile
@@ -287,13 +289,15 @@ async def main() -> None:
     core.load_operators()
     core.load_ops_chat()
 
+    workdir = tempfile.mkdtemp(prefix="rappdisibot-test-")
+    atexit.register(shutil.rmtree, workdir, ignore_errors=True)
     app = Client(
         "offline_test",
         api_id=cfg.api_id,
         api_hash=cfg.api_hash,
         bot_token=cfg.bot_token,
         plugins=dict(root="plugins"),
-        workdir=tempfile.mkdtemp(prefix="rappdisibot-test-"),
+        workdir=workdir,
     )
     app.me = User(id=BOT_ID, is_bot=True, first_name="Bot", username=BOT_USERNAME)
     app.load_plugins()
