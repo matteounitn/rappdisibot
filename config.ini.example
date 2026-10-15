@@ -1,0 +1,11 @@
+[pyrogram]
+api_id = 12345
+api_hash = 0123456789abcdef0123456789abcdef
+bot_token = 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+
+[bot]
+# ID della supergruppo operatori (forum con Topic attivi), es. -1001234567890
+operators_chat_id = -1001234567890
+# user ID Telegram degli admin iniziali, separati da virgola.
+# Sono sempre admin: non rimovibili dal menu /admin.
+admins = 11111111, 22222222

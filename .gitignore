@@ -1,0 +1,7 @@
+.venv/
+config.ini
+*.session
+*.session-journal
+rappdisibot.db
+__pycache__/
+.ruff_cache/
