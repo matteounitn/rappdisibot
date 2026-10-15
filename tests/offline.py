@@ -37,6 +37,7 @@ os.chdir(ROOT)
 from pyrogram import Client  # noqa: E402
 from pyrogram.enums import ChatMemberStatus, ChatType, MessageMediaType, ParseMode  # noqa: E402
 from pyrogram.errors import MessageNotModified, QueryIdInvalid, RPCError  # noqa: E402
+from pyrogram.handlers import CallbackQueryHandler, MessageHandler  # noqa: E402
 from pyrogram.types import (  # noqa: E402
     CallbackQuery,
     Chat,
@@ -239,10 +240,13 @@ def kb_data(markup):
 
 
 async def dispatch(app, update):
-    """Replica Dispatcher.handler_worker: un handler per gruppo, poi break."""
+    """Replica Dispatcher.handler_worker: tipo di handler e un handler per gruppo."""
     ran = []
+    atteso = CallbackQueryHandler if isinstance(update, CallbackQuery) else MessageHandler
     for group in app.dispatcher.groups.values():
         for handler in group:
+            if not isinstance(handler, atteso):
+                continue
             try:
                 matched = await handler.check(app, update)
             except Exception:
@@ -267,6 +271,12 @@ async def handler_for(app, handlers, update):
 async def main() -> None:
     global ADMIN, OPS_CHAT
 
+    # Tutti i file temporanei del test (db, .env, sessioni) finiscono in una
+    # cartella sola, rimossa a fine esecuzione anche in caso di uscita con errore.
+    tmpdir = tempfile.mkdtemp(prefix="rappdisibot-test-")
+    atexit.register(shutil.rmtree, tmpdir, ignore_errors=True)
+    tempfile.tempdir = tmpdir
+
     cfg_path = "config.ini" if Path("config.ini").is_file() else "config.ini.example"
     # I segreti arrivano da .env; da un clone pulito non esiste, quindi il test
     # se ne crea uno sintetico (nessun dato reale entra mai nella suite).
@@ -289,8 +299,7 @@ async def main() -> None:
     core.load_operators()
     core.load_ops_chat()
 
-    workdir = tempfile.mkdtemp(prefix="rappdisibot-test-")
-    atexit.register(shutil.rmtree, workdir, ignore_errors=True)
+    workdir = tempfile.mkdtemp(prefix="sessione-")
     app = Client(
         "offline_test",
         api_id=cfg.api_id,
@@ -726,6 +735,32 @@ async def main() -> None:
     check(
         "username salvato nel db per gli utenti già visti",
         db.find_user_by_username(f"@{USERNAME}") == STUDENT and db.get_username(STUDENT) == USERNAME,
+    )
+
+    # --- pulsanti rimasti da versioni precedenti --------------------------
+    # La prima versione usava `ban:<id>`: nei messaggi già inviati quel pulsante
+    # non ha più un handler, quindi senza il catch-all non farebbe nulla.
+    ran = await dispatch(app, cq(f"ban:{STUDENT}", MEMBER_X, mid=99, chat_id=OPS_CHAT))
+    check(
+        "pulsante di una versione precedente: viene gestito, non ignorato",
+        ran == ["plugins.user.callback_sconosciuta"],
+        str(ran),
+    )
+    CLIENT.answered.clear()
+    await dispatch(app, cq(f"ban:{STUDENT}", MEMBER_X, mid=98, chat_id=OPS_CHAT))
+    check(
+        "pulsante vecchio: l'operatore riceve un avviso",
+        "non è più attivo" in ([t for _i, t in CLIENT.answered][-1] or ""),
+        str(CLIENT.answered),
+    )
+    check(
+        "pulsante valido (pannello): non intercettato dal catch-all",
+        await dispatch(app, cq("admin:stats", ADMIN, mid=97)) == ["plugins.admin.stats"],
+    )
+    check(
+        "pulsante valido (allontana): non intercettato dal catch-all",
+        await dispatch(app, cq(f"ban:ask:{STUDENT}", MEMBER_X, mid=96, chat_id=OPS_CHAT))
+        == ["plugins.operators.ban_ask_callback"],
     )
 
     db.set_banned(STUDENT, True)

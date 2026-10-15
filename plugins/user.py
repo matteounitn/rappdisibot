@@ -140,6 +140,28 @@ async def relay_to_operators(client: Client, message: Message):
             await message.reply_text(structures.USER_UNSUPPORTED_TEXT)
 
 
+@Client.on_callback_query(
+    filters.create(lambda _, __, update: isinstance(update, CallbackQuery))
+)
+async def callback_sconosciuta(client: Client, cq: CallbackQuery):
+    """Risponde ai pulsanti che nessun altro handler riconosce.
+
+    Il dispatcher esegue **un solo** handler per gruppo, e questo è registrato per
+    ultimo (i plugin si caricano in ordine alfabetico e `user.py` è l'ultimo), quindi
+    scatta solo se nessun altro ha riconosciuto la callback. Senza di lui un pulsante
+    rimasto da una versione precedente non farebbe nulla e sembrerebbe rotto.
+    """
+    log.warning("Callback non riconosciuta: data=%r da %s", cq.data, cq.from_user.id)
+    try:
+        await cq.answer(
+            "⚠️ Non posso eseguire questa azione: il pulsante non è più attivo "
+            "oppure non hai i permessi. Vedi /help.",
+            show_alert=True,
+        )
+    except RPCError:
+        pass
+
+
 @Client.on_message(filters.command("close") & filters.private)
 async def close(client: Client, message: Message):
     uid = message.from_user.id
