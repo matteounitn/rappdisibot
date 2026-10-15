@@ -1,7 +1,12 @@
-[pyrogram]
-api_id = 12345
-api_hash = 0123456789abcdef0123456789abcdef
-bot_token = 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+# I segreti (api_id, api_hash, bot_token) stanno in `.env` — vedi `.env.example`:
+#   cp .env.example .env
+#
+# Se preferisci tenerli qui, togli il commento alle tre righe qui sotto: vengono
+# usati solo se `.env` (o l'ambiente) non li definisce.
+# [pyrogram]
+# api_id = 12345
+# api_hash = 0123456789abcdef0123456789abcdef
+# bot_token = 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
 
 [bot]
 # ID della supergruppo operatori (forum con Topic attivi), es. -1001234567890

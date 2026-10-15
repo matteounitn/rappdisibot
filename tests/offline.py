@@ -266,7 +266,17 @@ async def main() -> None:
     global ADMIN, OPS_CHAT
 
     cfg_path = "config.ini" if Path("config.ini").is_file() else "config.ini.example"
-    cfg = config.load_config(cfg_path)
+    # I segreti arrivano da .env; da un clone pulito non esiste, quindi il test
+    # se ne crea uno sintetico (nessun dato reale entra mai nella suite).
+    env_path = ".env" if Path(".env").is_file() else tempfile.mktemp(suffix=".env")
+    if env_path != ".env":
+        Path(env_path).write_text(
+            "RAPPDISIBOT_API_ID=12345\n"
+            "RAPPDISIBOT_API_HASH=0123456789abcdef0123456789abcdef\n"
+            "RAPPDISIBOT_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11\n",
+            encoding="utf-8",
+        )
+    cfg = config.load_config(cfg_path, env_path=env_path)
     ADMIN = cfg.seed_admins[0]
     OPS_CHAT = cfg.operators_chat_id
     print(f"config: {cfg_path} | admin: {ADMIN} | gruppo: {OPS_CHAT}\n")
@@ -787,6 +797,62 @@ async def main() -> None:
         "migrazione: la colonna username c'è ed è ricercabile (con o senza @, case-insensitive)",
         db.get_username(999) == "tizio" and db.find_user_by_username("@Tizio") == 999,
     )
+
+    # --- segreti: precedenza ambiente > .env > config.ini -----------------
+    # Tutto con file sintetici: la suite non legge né stampa segreti reali.
+    ini_prova = Path(tempfile.mktemp(suffix=".ini"))
+    ini_prova.write_text(
+        "[pyrogram]\napi_id = 77\napi_hash = aa\nbot_token = 77:bb\n\n"
+        "[bot]\noperators_chat_id = -100999\nadmins = 1\n",
+        encoding="utf-8",
+    )
+    env_prova = Path(tempfile.mktemp(suffix=".env"))
+    env_prova.write_text(
+        "RAPPDISIBOT_BOT_TOKEN=111:da-file-env\nRAPPDISIBOT_API_ID=4242\n", encoding="utf-8"
+    )
+
+    cfg_ini = config.load_config(str(ini_prova), env_path=tempfile.mktemp(suffix=".env"))
+    check(
+        "segreti: senza .env si usano quelli di config.ini (compatibilità)",
+        cfg_ini.bot_token == "77:bb" and cfg_ini.api_id == 77 and cfg_ini.operators_chat_id == -100999,
+        f"api_id={cfg_ini.api_id}",
+    )
+
+    cfg_env = config.load_config(str(ini_prova), env_path=str(env_prova))
+    check(
+        "segreti: .env vince su config.ini, il resto resta da config.ini",
+        cfg_env.bot_token == "111:da-file-env"
+        and cfg_env.api_id == 4242
+        and cfg_env.api_hash == "aa"
+        and cfg_env.operators_chat_id == -100999
+        and cfg_env.seed_admins == (1,),
+        f"api_id={cfg_env.api_id} token_da_env={cfg_env.bot_token == '111:da-file-env'}",
+    )
+
+    os.environ["RAPPDISIBOT_BOT_TOKEN"] = "222:da-ambiente"
+    cfg_amb = config.load_config(str(ini_prova), env_path=str(env_prova))
+    os.environ.pop("RAPPDISIBOT_BOT_TOKEN", None)
+    check(
+        "segreti: la variabile d'ambiente vince sul .env",
+        cfg_amb.bot_token == "222:da-ambiente",
+        f"da_ambiente={cfg_amb.bot_token == '222:da-ambiente'}",
+    )
+
+    ini_senza = Path(tempfile.mktemp(suffix=".ini"))
+    ini_senza.write_text("[bot]\noperators_chat_id = -100\nadmins = 1\n", encoding="utf-8")
+    try:
+        config.load_config(str(ini_senza), env_path=tempfile.mktemp(suffix=".env"))
+    except SystemExit as e:
+        messaggio = str(e)
+    else:
+        messaggio = ""
+    check(
+        "segreto mancante: messaggio chiaro che indica .env e config.ini",
+        "RAPPDISIBOT_" in messaggio and ".env.example" in messaggio and "[pyrogram]" in messaggio,
+        messaggio,
+    )
+
+    config.load_config(cfg_path, env_path=env_path)  # ripristina CFG
 
     failed = [label for label, ok in RESULTS if not ok]
     print(f"\n{len(RESULTS) - len(failed)}/{len(RESULTS)} controlli superati")

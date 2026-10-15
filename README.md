@@ -34,34 +34,36 @@ pip install -r requirements.txt
 ## Configurazione
 
 ```bash
+cp .env.example .env      # segreti (api_id, api_hash, bot_token)
 cp config.ini.example config.ini
 ```
 
-Poi compila `config.ini`:
+I **segreti** stanno in `.env` (che è in `.gitignore`, quindi non finisce nel
+repository) e hanno la precedenza su `config.ini`; le variabili d'ambiente reali
+(`RAPPDISIBOT_BOT_TOKEN`, …) vincono su `.env`, comodo per systemd o Docker.
+In `config.ini` restano le impostazioni non segrete:
 
 ```ini
-[pyrogram]
-api_id = 12345
-api_hash = 0123456789abcdef0123456789abcdef
-bot_token = 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-
 [bot]
 operators_chat_id = -1001234567890
 admins = 11111111, 22222222
 ```
 
+Se preferisci, i segreti si possono ancora mettere in `config.ini` sotto
+`[pyrogram]`: vengono usati solo se `.env` e l'ambiente non li definiscono.
+
 - **api_id / api_hash**: da <https://my.telegram.org/auth?to=apps> (crea una app,
   i valori non dipendono dal bot).
-- **bot_token**: da @BotFather. Ora sta **in `config.ini`**, non più dentro
-  `bot.py`. Il vecchio token è stato versionato in chiaro per anni: se non l'hai
-  già fatto, revocalo con `/revoke` su @BotFather e usa quello nuovo.
+- **bot_token**: da @BotFather, in `.env` (`RAPPDISIBOT_BOT_TOKEN`). Il vecchio
+  token è stato versionato in chiaro per anni (e il repository è pubblico):
+  **revocalo con `/revoke` su @BotFather** e usa quello nuovo.
 - **operators_chat_id**: id della supergruppo operatori (formato `-100…`). È il
   valore di partenza: un admin può sovrascriverlo a runtime con `/setgroup`
   dentro il gruppo (vedi sotto).
 - **admins**: user ID Telegram degli admin iniziali, separati da virgola. Vengono
   reinseriti a ogni avvio e **non sono rimovibili** dal menu `/admin`.
 
-`config.ini` è in `.gitignore`: non finisce nel repository.
+`.env` e `config.ini` sono in `.gitignore`: non finiscono nel repository.
 
 ### Gruppo operatori
 
