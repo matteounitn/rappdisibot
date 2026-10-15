@@ -140,6 +140,20 @@ async def relay_to_operators(client: Client, message: Message):
             await message.reply_text(structures.USER_UNSUPPORTED_TEXT)
 
 
+# Prefissi dei pulsanti gestiti dagli handler: serve solo a distinguere
+# "non più attivo" da "non autorizzato" nell'avviso qui sotto. Aggiornalo quando
+# aggiungi un pulsante nuovo.
+PULSANTI_NOTI = (
+    "admin:",
+    "ban:ask:",
+    "ban:yes:",
+    "ban:no:",
+    "unban:",
+    "broadcast:",
+    "helpme",
+)
+
+
 @Client.on_callback_query(
     filters.create(lambda _, __, update: isinstance(update, CallbackQuery))
 )
@@ -148,16 +162,19 @@ async def callback_sconosciuta(client: Client, cq: CallbackQuery):
 
     Il dispatcher esegue **un solo** handler per gruppo, e questo è registrato per
     ultimo (i plugin si caricano in ordine alfabetico e `user.py` è l'ultimo), quindi
-    scatta solo se nessun altro ha riconosciuto la callback. Senza di lui un pulsante
-    rimasto da una versione precedente non farebbe nulla e sembrerebbe rotto.
+    scatta solo se nessun altro ha riconosciuto la callback. I casi sono due:
+    un pulsante di una versione precedente (nessun handler lo conosce più) oppure un
+    pulsante valido premuto da chi non ha i permessi (il filtro dell'handler l'ha
+    scartato). Senza di lui in entrambi i casi non succederebbe nulla.
     """
-    log.warning("Callback non riconosciuta: data=%r da %s", cq.data, cq.from_user.id)
+    data = cq.data or ""
+    if data.startswith(PULSANTI_NOTI):
+        testo = "⚠️ Non hai i permessi per questa azione."
+    else:
+        testo = "⚠️ Questo pulsante non è più attivo: usa /help per i comandi."
+    log.warning("Callback non gestita: data=%r da %s", cq.data, cq.from_user.id)
     try:
-        await cq.answer(
-            "⚠️ Non posso eseguire questa azione: il pulsante non è più attivo "
-            "oppure non hai i permessi. Vedi /help.",
-            show_alert=True,
-        )
+        await cq.answer(testo, show_alert=True)
     except RPCError:
         pass
 

@@ -763,6 +763,21 @@ async def main() -> None:
         == ["plugins.operators.ban_ask_callback"],
     )
 
+    # Un estraneo preme un pulsante valido: il filtro dell'handler lo scarta, quindi
+    # risponde il catch-all — e deve dire "permessi", non "non più attivo".
+    stato_prima = db.is_banned(STUDENT)
+    core.operator_ids.add(MEMBER_X)  # whitelist attiva: 777999 non è operatore
+    CLIENT.answered.clear()
+    ran = await dispatch(app, cq(f"ban:yes:{STUDENT}", 777999, mid=95, chat_id=OPS_CHAT))
+    core.operator_ids.discard(MEMBER_X)
+    check(
+        "pulsante valido premuto da un estraneo: avviso sui permessi",
+        ran == ["plugins.user.callback_sconosciuta"]
+        and "permessi" in ([t for _i, t in CLIENT.answered][-1] or "")
+        and db.is_banned(STUDENT) == stato_prima,
+        f"{ran} {CLIENT.answered}",
+    )
+
     db.set_banned(STUDENT, True)
     CLIENT.created_topics.clear()
     CLIENT.sent.clear()
