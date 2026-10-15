@@ -1,8 +1,7 @@
 .venv/
 .env
 config.ini
-*.session
-*.session-journal
+*.session*
 rappdisibot.db
 __pycache__/
 .ruff_cache/

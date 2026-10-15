@@ -54,9 +54,11 @@ Se preferisci, i segreti si possono ancora mettere in `config.ini` sotto
 
 - **api_id / api_hash**: da <https://my.telegram.org/auth?to=apps> (crea una app,
   i valori non dipendono dal bot).
-- **bot_token**: da @BotFather, in `.env` (`RAPPDISIBOT_BOT_TOKEN`). Il vecchio
-  token è stato versionato in chiaro per anni (e il repository è pubblico):
-  **revocalo con `/revoke` su @BotFather** e usa quello nuovo.
+- **bot_token**: da @BotFather, in `.env` (`RAPPDISIBOT_BOT_TOKEN`): `.env` è in
+  `.gitignore`, quindi il token non finisce nel repository. Se il token è stato
+  condiviso o incollato da qualche parte, revocalo con `/revoke` su @BotFather;
+  dopo la revoca rinomina o cancella `rappdisibot.session`, altrimenti all'avvio
+  ottieni `[401 SESSION_REVOKED]` (il bot rifà l'accesso col token nuovo).
 - **operators_chat_id**: id della supergruppo operatori (formato `-100…`). È il
   valore di partenza: un admin può sovrascriverlo a runtime con `/setgroup`
   dentro il gruppo (vedi sotto).
